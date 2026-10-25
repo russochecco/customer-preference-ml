@@ -119,7 +119,6 @@ if __name__ == "__main__":
         "USERS_DATASET_PATH": os.environ["USERS_DATASET_PATH"],
         "PRODUCTS_DATASET_PATH": os.environ["PRODUCTS_DATASET_PATH"],
         "EXPLICIT_PREFERENCES_DATASET_PATH": os.environ["EXPLICIT_PREFERENCES_DATASET_PATH"],
-        "ALPHA": os.environ["ALPHA"],
         "NUM_ITEMS_PER_USER": os.environ["NUM_ITEMS_PER_USER"],
     }
 

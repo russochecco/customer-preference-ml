@@ -69,27 +69,61 @@ Ensure you have Python 3.12+ and Spark prerequisites configured locally. Initial
 poetry install
 ```
 
-### 2. Execution Run Paths
+### 2. Execution Run Paths via Cluster Deployments
 
-#### Executing the Explicit ML Pipeline
-The pipeline reads directly from the target environment properties or defaults gracefully to files positioned inside the local `data/` folder directory tree:
-
-```bash
-poetry run python src/customer_preference_ml/explicit_pipeline.py
-```
+Both pipelines run inside your target Spark Cluster environment. Ensure your local master worker (`spark://127.0.0.1:7077`) is running before job submission.
 
 #### Executing the Implicit ML Pipeline
-The implicit pipeline requires runtime pipeline values passed through environment context profiles to drive configuration tuning:
+To run the implicit configuration track, activate your `.venv` container, pass your pipeline tuning configurations as shell environment variables, and route your job run directly via `spark-submit`:
 
 ```bash
-export MODEL_PATH="models/implicit_als_model"
-export USERS_DATASET_PATH="data/users.csv"
-export PRODUCTS_DATASET_PATH="data/products.csv"
-export PREFERENCES_DATASET_PATH="data/implicit_preferences.csv"
-export ALPHA="40.0"
-export NUM_ITEMS_PER_USER="5"
+#!/bin/bash
+clear
+source .venv/bin/activate
 
-poetry run python src/customer_preference_ml/implicit_pipeline.py
+# Configure pipeline environment parameters
+export MODEL_PATH=models/implicit_als_model
+export USERS_DATASET_PATH=data/users.csv
+export PRODUCTS_DATASET_PATH=data/products.csv
+export IMPLICIT_PREFERENCES_DATASET_PATH=data/implicit_preferences.csv
+export NUM_ITEMS_PER_USER=3
+export ALPHA=40.0
+
+# Submit recommendation modeling job to the Spark standalone cluster
+spark-submit \
+  --master spark://127.0.0.1:7077 \
+  --deploy-mode client \
+  --num-executors 2 \
+  --total-executor-cores 2 \
+  --executor-memory 2g \
+  --conf spark.sql.shuffle.partitions=4 \
+  src/customer_preference_ml/implicit_pipeline.py
+```
+
+#### Executing the Explicit ML Pipeline
+To execute the explicit feedback tracking module, declare your operational constraints and submit your workflow runtime to your standalone master node:
+
+```bash
+#!/bin/bash
+clear
+source .venv/bin/activate
+
+# Configure pipeline environment parameters
+export MODEL_PATH=models/explicit_als_model
+export USERS_DATASET_PATH=data/users.csv
+export PRODUCTS_DATASET_PATH=data/products.csv
+export EXPLICIT_PREFERENCES_DATASET_PATH=data/explicit_preferences.csv
+export NUM_ITEMS_PER_USER=3
+
+# Submit factorization modeling job to the Spark standalone cluster
+spark-submit \
+  --master spark://127.0.0.1:7077 \
+  --deploy-mode client \
+  --num-executors 2 \
+  --total-executor-cores 2 \
+  --executor-memory 2g \
+  --conf spark.sql.shuffle.partitions=4 \
+  src/customer_preference_ml/explicit_pipeline.py
 ```
 
 ---
@@ -98,7 +132,7 @@ poetry run python src/customer_preference_ml/implicit_pipeline.py
 
 Automated checking procedures run on top of the `pytest` engine. By configuring a custom `pythonpath` within the project manifest, namespace crashes are avoided entirely. 
 
-The test files make use of isolated, in-memory `SparkSession` configurations alongside `tmp_path` fixtures to construct mock CSV files on-the-fly, ensuring that automated test runs never alter local workspace datasets.
+The test files make use of isolated, in-memory `SparkSession` configurations alongside `tmp_path` fixtures to construct mock CSV files on-the-fly, ensuring that automated test runs never alter local workspace datasets or conflict with your active production cluster tasks.
 
 To execute the entire explicit and implicit engineering evaluation suite:
 

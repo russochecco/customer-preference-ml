@@ -1,23 +1,37 @@
-# Spark / Hadoop temporary files
+# PySpark / Hadoop cluster run-time artifacts
 .spark-staging/
 derby.log
 metastore_db/
 spark-warehouse/
+*.dump
+eventLogs/
 
-# Local data & model storage (keeps your repo light)
-models/*
+# Data Directory (Ignore raw files but keep directory framework if needed)
 data/*.csv
 
-# Python environment & cache
+# Local Model Storage (Keeps your repo light, keeps models/ directory layout)
+models/**/*
+!models/.gitkeep
+
+# Python Core & Cache compiled bytecode
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Virtual Environments
 .venv/
 venv/
-.ipynb_checkpoints/
-.idea
-.submit*
+ENV/
+
+# IDEs, Editors & System Garbage
+.idea/
+.vscode/
+*.swp
+*.swo
 .DS_Store
-images/.DS_Store
-src/.DS_Store
-poetry.lock
-dist
+**/.DS_Store
+
+# Spark submit tracking logs
+.submit*
