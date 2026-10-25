@@ -1,0 +1,23 @@
+# Spark / Hadoop temporary files
+.spark-staging/
+derby.log
+metastore_db/
+spark-warehouse/
+
+# Local data & model storage (keeps your repo light)
+models/*
+data/*.csv
+
+# Python environment & cache
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+.idea
+.submit*
+.DS_Store
+images/.DS_Store
+src/.DS_Store
+poetry.lock
+dist
