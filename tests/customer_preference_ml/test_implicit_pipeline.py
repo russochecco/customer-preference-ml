@@ -1,26 +1,7 @@
 import pytest
 from pyspark.sql import functions as F
-from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType, StructField, IntegerType, ArrayType, FloatType
 from customer_preference_ml.implicit_pipeline import transform_recommendations, run_pipeline
-
-
-@pytest.fixture(scope="session")
-def spark_session():
-    """
-    Initializes a fast, local Spark Session explicitly configured for
-    isolated, in-memory automated test environments.
-    """
-    spark = (
-        SparkSession.builder
-        .master("local[2]")
-        .appName("ImplicitPipelineTesting")
-        .config("spark.sql.shuffle.partitions", "1")
-        .getOrCreate()
-    )
-
-    yield spark
-    spark.stop()
 
 
 @pytest.fixture
