@@ -70,16 +70,19 @@ The execution examples below are configured specifically to submit jobs to a **S
 #### Executing the Implicit ML Pipeline on a Standalone Cluster
 To run the implicit configuration track, activate your environment container, pass your pipeline tuning configurations as shell environment variables, and route your job run directly via `spark-submit`:
 
-<pre><code>\#!/bin/bash
-source .venv/bin/activate<br>
-\# Configure pipeline environment parameters
+<pre><code>#!/bin/bash
+
+source .venv/bin/activate
+
+# Configure pipeline environment parameters
 export MODEL_PATH=models/implicit_als_model
 export USERS_DATASET_PATH=data/users.csv
 export PRODUCTS_DATASET_PATH=data/products.csv
 export IMPLICIT_PREFERENCES_DATASET_PATH=data/implicit_preferences.csv
 export NUM_ITEMS_PER_USER=3
-export ALPHA=40.0<br>
-\# Submit recommendation modeling job to the Spark standalone cluster
+export ALPHA=40.0
+
+# Submit recommendation modeling job to the Spark standalone cluster
 spark-submit \
   --master spark://127.0.0.1:7077 \
   --deploy-mode client \
@@ -93,15 +96,18 @@ spark-submit \
 #### Executing the Explicit ML Pipeline on a Standalone Cluster
 To execute the explicit feedback tracking module, declare your operational constraints and submit your workflow runtime to your standalone master node:
 
-<pre><code>\#!/bin/bash
-source .venv/bin/activate<br>
-\# Configure pipeline environment parameters
+<pre><code>#!/bin/bash
+
+source .venv/bin/activate
+
+# Configure pipeline environment parameters
 export MODEL_PATH=models/explicit_als_model
 export USERS_DATASET_PATH=data/users.csv
 export PRODUCTS_DATASET_PATH=data/products.csv
 export EXPLICIT_PREFERENCES_DATASET_PATH=data/explicit_preferences.csv
-export NUM_ITEMS_PER_USER=3<br>
-\# Submit factorization modeling job to the Spark standalone cluster
+export NUM_ITEMS_PER_USER=3
+
+# Submit factorization modeling job to the Spark standalone cluster
 spark-submit \
   --master spark://127.0.0.1:7077 \
   --deploy-mode client \
