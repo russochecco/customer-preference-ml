@@ -5,9 +5,6 @@ spark-warehouse/
 *.dump
 eventLogs/
 
-# Data Directory
-data/*.csv
-
 # Local Model Storage
 models/**/*
 !models/.gitkeep

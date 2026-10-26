@@ -1,0 +1,9 @@
+user_id,name,email,signup_country,membership_tier
+1000,Alice Johnson,alice.j@example.com,US,Premium
+1001,Bob Smith,bob.smith@example.com,CA,Standard
+1002,Charlie Brown,charlie.b@example.com,US,Free
+1003,Diana Prince,diana.p@example.com,UK,Premium
+1004,Evan Wright,evan.w@example.com,AU,Standard
+1005,Fiona Gallagher,fiona.g@example.com,IE,Free
+1006,George Costanza,george.c@example.com,US,Premium
+1007,Hannah Abbott,hannah.a@example.com,UK,Standard
