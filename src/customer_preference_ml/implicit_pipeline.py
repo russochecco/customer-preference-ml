@@ -52,14 +52,11 @@ def run_pipeline(spark: SparkSession, config: dict):
     """Executes the complete core implicit recommendations matrix pipeline training loop."""
     log.info("Initializing Implicit Preferences ML Pipeline...")
 
-    try:
-        log.info("Ingesting datasets...")
-        users_df = spark.read.csv(config["USERS_DATASET_PATH"], header=True, inferSchema=True)
-        products_df = spark.read.csv(config["PRODUCTS_DATASET_PATH"], header=True, inferSchema=True)
-        implicit_prefs_df = spark.read.csv(config["IMPLICIT_PREFERENCES_DATASET_PATH"], header=True, inferSchema=True)
-    except Exception as e:
-        log.error(f"Critical Data Ingestion Error: {str(e)}")
-        raise e
+    # Data ingestion happens naturally; failures bubble up automatically
+    log.info("Ingesting datasets...")
+    users_df = spark.read.csv(config["USERS_DATASET_PATH"], header=True, inferSchema=True)
+    products_df = spark.read.csv(config["PRODUCTS_DATASET_PATH"], header=True, inferSchema=True)
+    implicit_prefs_df = spark.read.csv(config["IMPLICIT_PREFERENCES_DATASET_PATH"], header=True, inferSchema=True)
 
     log.info("Configuring ALS estimator for implicit confidence mapping...")
     als_implicit = ALS(
@@ -68,7 +65,7 @@ def run_pipeline(spark: SparkSession, config: dict):
         userCol="user_id",
         itemCol="product_id",
         ratingCol="interaction_count",
-        implicitPrefs=True, # Implicit rating calculations
+        implicitPrefs=True,
         alpha=float(config["ALPHA"]),
         coldStartStrategy="drop"
     )
@@ -84,12 +81,9 @@ def run_pipeline(spark: SparkSession, config: dict):
     log.info("Displaying final recommendation matrix output:")
     recommendations_matrix.show(truncate=False)
 
-    try:
-        log.info(f"Saving serialized model pipeline weights to disk: {config['MODEL_PATH']}")
-        model_implicit.write().overwrite().save(config["MODEL_PATH"])
-    except Exception as e:
-        log.error(f"Failed to persist model artifacts: {str(e)}")
-        raise e
+    # Model saving happens naturally
+    log.info(f"Saving serialized model pipeline weights to disk: {config['MODEL_PATH']}")
+    model_implicit.write().overwrite().save(config["MODEL_PATH"])
 
 
 if __name__ == "__main__":
@@ -106,10 +100,11 @@ if __name__ == "__main__":
     }
 
     session = get_spark_session()
+
     try:
         run_pipeline(session, pipeline_config)
-    except Exception:
-        session.stop()
+    except Exception as e:
+        log.exception("Pipeline execution failed contextually:")
         sys.exit(1)
     finally:
         session.stop()

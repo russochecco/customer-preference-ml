@@ -9,6 +9,7 @@ from pyspark.sql.functions import explode
 APP_NAME = "ExplicitPipeline"
 log = logging.getLogger(APP_NAME)
 
+
 def setup_logging():
     """Configures systemic pipeline logging diagnostics."""
     if not log.hasHandlers():
@@ -32,7 +33,8 @@ def get_spark_session() -> SparkSession:
     )
 
 
-def transform_recommendations(user_recommendations: DataFrame, users_df: DataFrame, products_df: DataFrame) -> DataFrame:
+def transform_recommendations(user_recommendations: DataFrame, users_df: DataFrame,
+                              products_df: DataFrame) -> DataFrame:
     """Transforms raw recommendation array structures to relational rows with explicit metadata."""
     exploded_recs = (
         user_recommendations.withColumn("rec", explode("recommendations"))
@@ -50,15 +52,11 @@ def run_pipeline(spark: SparkSession, config: dict):
     """Executes the complete explicit recommendations matrix pipeline training and evaluation loop."""
     log.info("Initializing Explicit Preferences ML Pipeline...")
 
-    # 1. File Verification & Ingestion
-    try:
-        log.info("Ingesting datasets from local file system...")
-        users_df = spark.read.csv(config["USERS_DATASET_PATH"], header=True, inferSchema=True)
-        products_df = spark.read.csv(config["PRODUCTS_DATASET_PATH"], header=True, inferSchema=True)
-        explicit_prefs_df = spark.read.csv(config["EXPLICIT_PREFERENCES_DATASET_PATH"], header=True, inferSchema=True)
-    except Exception as e:
-        log.error(f"Critical Data Ingestion Error: {str(e)}")
-        raise e
+    # 1. File Verification & Ingestion (Failures bubble up naturally)
+    log.info("Ingesting datasets from local file system...")
+    users_df = spark.read.csv(config["USERS_DATASET_PATH"], header=True, inferSchema=True)
+    products_df = spark.read.csv(config["PRODUCTS_DATASET_PATH"], header=True, inferSchema=True)
+    explicit_prefs_df = spark.read.csv(config["EXPLICIT_PREFERENCES_DATASET_PATH"], header=True, inferSchema=True)
 
     # 2. Train/Test Data Splitting
     log.info("Splitting preference matrix into training (80%) and validation (20%) windows...")
@@ -80,7 +78,7 @@ def run_pipeline(spark: SparkSession, config: dict):
     log.info("Training explicit preference model...")
     model_explicit = als_explicit.fit(training)
 
-    # 5. Model Evaluation
+    # 5. Model Evaluation (Kept because it absorbs errors to prevent pipeline failure)
     log.info("Evaluating predictions against test partition...")
     predictions = model_explicit.transform(test)
     evaluator = RegressionEvaluator(metricName="rmse", labelCol="rating", predictionCol="prediction")
@@ -100,14 +98,10 @@ def run_pipeline(spark: SparkSession, config: dict):
     log.info("Displaying final recommendation matrix output:")
     final_explicit_report.show(truncate=False)
 
-    # 7. Production Artifact Persistence
-    try:
-        os.makedirs(os.path.dirname(config["MODEL_PATH"]), exist_ok=True)
-        log.info(f"Saving serialized model pipeline weights to disk: {config['MODEL_PATH']}")
-        model_explicit.write().overwrite().save(config["MODEL_PATH"])
-    except Exception as e:
-        log.error(f"Failed to persist model artifacts: {str(e)}")
-        raise e
+    # 7. Production Artifact Persistence (Failures bubble up naturally)
+    os.makedirs(os.path.dirname(config["MODEL_PATH"]), exist_ok=True)
+    log.info(f"Saving serialized model pipeline weights to disk: {config['MODEL_PATH']}")
+    model_explicit.write().overwrite().save(config["MODEL_PATH"])
 
 
 if __name__ == "__main__":
@@ -123,10 +117,11 @@ if __name__ == "__main__":
     }
 
     session = get_spark_session()
+    
     try:
         run_pipeline(session, pipeline_config)
-    except Exception:
-        session.stop()
+    except Exception as e:
+        log.exception("Pipeline execution failed contextually:")
         sys.exit(1)
     finally:
         session.stop()
