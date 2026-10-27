@@ -117,11 +117,12 @@ if __name__ == "__main__":
     }
 
     session = get_spark_session()
-    
+
     try:
         run_pipeline(session, pipeline_config)
     except Exception as e:
         log.exception("Pipeline execution failed contextually:")
         sys.exit(1)
     finally:
+        log.info("Stopping Spark Application Session Context safely.")
         session.stop()

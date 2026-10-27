@@ -107,4 +107,5 @@ if __name__ == "__main__":
         log.exception("Pipeline execution failed contextually:")
         sys.exit(1)
     finally:
+        log.info("Stopping Spark Application Session Context safely.")
         session.stop()
