@@ -6,6 +6,7 @@ from pyspark.ml.recommendation import ALS
 from pyspark.sql.functions import explode
 
 APP_NAME = "ImplicitPipeline"
+
 log = logging.getLogger(APP_NAME)
 
 

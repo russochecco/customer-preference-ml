@@ -7,6 +7,7 @@ from pyspark.ml.evaluation import RegressionEvaluator
 from pyspark.sql.functions import explode
 
 APP_NAME = "ExplicitPipeline"
+
 log = logging.getLogger(APP_NAME)
 
 
