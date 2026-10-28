@@ -91,12 +91,12 @@ def run_pipeline(spark: SparkSession, config: dict):
 
     # 6. Generate Recommendations & Map Metadata
     log.info(f"Generating top {config['NUM_ITEMS_PER_USER']} explicit recommendations per active customer registry...")
-    user_recs = model_explicit.recommendForAllUsers(int(config["NUM_ITEMS_PER_USER"]))
+    user_recommendations = model_explicit.recommendForAllUsers(int(config["NUM_ITEMS_PER_USER"]))
 
-    final_explicit_report = transform_recommendations(user_recs, users_df, products_df)
+    recommendation_matrix = transform_recommendations(user_recommendations, users_df, products_df)
 
     log.info("Displaying final recommendation matrix output:")
-    final_explicit_report.show(truncate=False)
+    recommendation_matrix.show(truncate=False)
 
     # 7. Production Artifact Persistence (Failures bubble up naturally)
     os.makedirs(os.path.dirname(config["MODEL_PATH"]), exist_ok=True)
